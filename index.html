@@ -48,6 +48,7 @@
 
 <div id="quiz">
     <h1>pipiQuiz - Arkadaşlık Testi</h1>
+    <input type="text" id="user-name" placeholder="Adınızı girin" required>
     <div id="questions"></div>
     <button onclick="generateLink()">Linki Oluştur</button>
 </div>
@@ -108,15 +109,18 @@
 
     // Link oluşturma
     function generateLink() {
+        const userName = document.getElementById('user-name').value;
         const answerStr = answers.join(",");
-        const shareLink = `${window.location.origin}${window.location.pathname}?answers=${answerStr}`;
+        const encodedAnswers = btoa(answerStr); // Cevapları Base64 ile şifreleme
+        const shareLink = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(userName)}&answers=${encodedAnswers}`;
         document.getElementById('link').innerHTML = `<a href="${shareLink}">${shareLink}</a>`;
         document.getElementById('share-link').style.display = 'block';
     }
 
     // Tahmin sorularını gösterme
-    function renderGuessQuestions(correctAnswers) {
+    function renderGuessQuestions(correctAnswers, userName) {
         const guessContainer = document.getElementById('guess-questions');
+        guessContainer.innerHTML = `<h3>${userName} neleri seviyor?</h3>`; // Kullanıcı adı burada görünecek
         questions.forEach((q, index) => {
             const qDiv = document.createElement('div');
             qDiv.innerHTML = `<p>${q.question}</p>`;
@@ -152,15 +156,18 @@
         document.getElementById('score').innerText = `Doğru Sayısı: ${score}/${questions.length}`;
     }
 
-    // URL parametresine göre hangi bölümü göstereceğimizi kontrol etme
+    // URL parametrelerine göre hangi bölümü göstereceğimizi kontrol etme
     function checkAnswers() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('answers')) {
-            const correctAnswers = urlParams.get('answers').split(",");
+            const userName = urlParams.get('name'); // Kullanıcı adı
+            const encodedAnswers = urlParams.get('answers');
+            const decodedAnswers = atob(encodedAnswers); // Base64 ile şifrelenmiş cevapları çözme
+            const correctAnswers = decodedAnswers.split(",");
             correctAnswers.forEach((ans, index) => {
                 questions[index].correctAnswer = ans;
             });
-            renderGuessQuestions(correctAnswers);
+            renderGuessQuestions(correctAnswers, userName); // Kullanıcı adını burada gönderiyoruz
             document.getElementById('guess-section').style.display = 'block';
         } else {
             renderQuestions();
