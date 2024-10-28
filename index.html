@@ -10,8 +10,13 @@
             background-color: #f4f4f9;
             color: #333;
             text-align: center;
+            transition: background-color 0.3s, color 0.3s;
         }
-        #quiz, #share-link, #guess-section {
+        body.dark {
+            background-color: #333;
+            color: #f4f4f9;
+        }
+        #quiz, #share-link, #guess-section, #leaderboard {
             max-width: 600px;
             margin: auto;
             padding: 20px;
@@ -19,6 +24,10 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
+            transition: background 0.3s;
+        }
+        body.dark #quiz, body.dark #share-link, body.dark #guess-section, body.dark #leaderboard {
+            background: #444;
         }
         button {
             padding: 10px 20px;
@@ -42,9 +51,26 @@
         .option-btn.incorrect {
             background-color: red;
         }
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        #leaderboard {
+            margin-top: 40px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
+
+<button id="theme-toggle" onclick="toggleTheme()">Tema Değiştir</button>
 
 <div id="quiz">
     <h1>pipiQuiz - Arkadaşlık Testi</h1>
@@ -65,6 +91,17 @@
     <p id="score"></p>
 </div>
 
+<div id="leaderboard" style="display: none;">
+    <h2>Leaderboard</h2>
+    <table id="leaderboard-table">
+        <tr>
+            <th>İsim</th>
+            <th>Doğru</th>
+            <th>Yanlış</th>
+        </tr>
+    </table>
+</div>
+
 <script>
     const questions = [
         { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], correctAnswer: null },
@@ -79,8 +116,8 @@
         { question: "Hangi müzik türünü seversin?", options: ["Pop", "Rock", "Caz", "Klasik"], correctAnswer: null }
     ];
     let answers = [];
+    let leaderboard = [];
 
-    // Soruları gösterme ve cevapları kaydetme
     function renderQuestions() {
         const questionContainer = document.getElementById('questions');
         questions.forEach((q, index) => {
@@ -101,26 +138,23 @@
         });
     }
 
-    // Tüm seçenekleri devre dışı bırakma
     function disableOptions(questionDiv) {
         const buttons = questionDiv.querySelectorAll('.option-btn');
         buttons.forEach(btn => btn.disabled = true);
     }
 
-    // Link oluşturma
     function generateLink() {
         const userName = document.getElementById('user-name').value;
         const answerStr = answers.join(",");
-        const encodedAnswers = btoa(answerStr); // Cevapları Base64 ile şifreleme
+        const encodedAnswers = btoa(answerStr);
         const shareLink = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(userName)}&answers=${encodedAnswers}`;
         document.getElementById('link').innerHTML = `<a href="${shareLink}">${shareLink}</a>`;
         document.getElementById('share-link').style.display = 'block';
     }
 
-    // Tahmin sorularını gösterme
     function renderGuessQuestions(correctAnswers, userName) {
         const guessContainer = document.getElementById('guess-questions');
-        guessContainer.innerHTML = `<h3>${userName} neleri seviyor?</h3>`; // Kullanıcı adı burada görünecek
+        guessContainer.innerHTML = `<h3>${userName} neleri seviyor?</h3>`;
         questions.forEach((q, index) => {
             const qDiv = document.createElement('div');
             qDiv.innerHTML = `<p>${q.question}</p>`;
@@ -138,9 +172,9 @@
         });
     }
 
-    // Sonucu gösterme
     function revealResults() {
         let score = 0;
+        let wrongAnswers = 0;
         const guessContainer = document.getElementById('guess-questions');
         const guessButtons = guessContainer.querySelectorAll('.option-btn');
         guessButtons.forEach((btn, index) => {
@@ -151,30 +185,40 @@
                 score++;
             } else if (btn.dataset.selected) {
                 btn.classList.add('incorrect');
+                wrongAnswers++;
             }
         });
+        
+        const userName = document.getElementById('user-name').value;
+        updateLeaderboard(userName, score, wrongAnswers);
         document.getElementById('score').innerText = `Doğru Sayısı: ${score}/${questions.length}`;
+        document.getElementById('leaderboard').style.display = 'block';
+        renderLeaderboard();
     }
 
-    // URL parametrelerine göre hangi bölümü göstereceğimizi kontrol etme
-    function checkAnswers() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('answers')) {
-            const userName = urlParams.get('name'); // Kullanıcı adı
-            const encodedAnswers = urlParams.get('answers');
-            const decodedAnswers = atob(encodedAnswers); // Base64 ile şifrelenmiş cevapları çözme
-            const correctAnswers = decodedAnswers.split(",");
-            correctAnswers.forEach((ans, index) => {
-                questions[index].correctAnswer = ans;
-            });
-            renderGuessQuestions(correctAnswers, userName); // Kullanıcı adını burada gönderiyoruz
-            document.getElementById('guess-section').style.display = 'block';
-        } else {
-            renderQuestions();
-        }
+    function updateLeaderboard(name, correct, incorrect) {
+        leaderboard.push({ name, correct, incorrect });
     }
 
-    window.onload = checkAnswers;
+    function renderLeaderboard() {
+        const leaderboardTable = document.getElementById('leaderboard-table');
+        leaderboardTable.innerHTML = `<tr>
+            <th>İsim</th>
+            <th>Doğru</th>
+            <th>Yanlış</th>
+        </tr>`;
+        leaderboard.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${entry.name}</td><td>${entry.correct}</td><td>${entry.incorrect}</td>`;
+            leaderboardTable.appendChild(row);
+        });
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark');
+    }
+
+    renderQuestions();
 </script>
 
 </body>
