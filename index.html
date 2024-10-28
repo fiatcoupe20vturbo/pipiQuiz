@@ -1,6 +1,53 @@
-<!-- index.html -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pipiQuiz - Arkadaşlık Testi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+        }
+        #quiz, #share-link, #guess-section {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        .option-btn {
+            background-color: #2196F3;
+        }
+        .option-btn.correct {
+            background-color: green;
+        }
+        .option-btn.incorrect {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+
 <div id="quiz">
-    <h1>pipiQuiz - Arkadaşlık Testi</h1>
+    <h1>Arkadaşlık Testi</h1>
     <div id="questions"></div>
     <button onclick="generateLink()">Linki Oluştur</button>
 </div>
@@ -13,14 +60,16 @@
 <div id="guess-section" style="display: none;">
     <h2>Tahmin Et</h2>
     <div id="guess-questions"></div>
-    <button onclick="checkAnswers()">Sonucu Gör</button>
+    <button onclick="revealResults()">Sonucu Gör</button>
     <p id="score"></p>
 </div>
 
 <script>
     const questions = [
-        { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"] },
-        { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"] }
+        { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], correctAnswer: null },
+        { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"], correctAnswer: null },
+        { question: "Yaz mı kış mı?", options: ["Yaz", "Kış"], correctAnswer: null },
+        { question: "Kahve mi çay mı?", options: ["Kahve", "Çay"], correctAnswer: null }
     ];
     let answers = [];
 
@@ -33,14 +82,22 @@
             q.options.forEach((opt, i) => {
                 const optBtn = document.createElement('button');
                 optBtn.innerText = opt;
+                optBtn.className = 'option-btn';
                 optBtn.onclick = () => {
                     answers[index] = i;
-                    optBtn.disabled = true;
+                    questions[index].correctAnswer = i; // Doğru cevabı kaydet
+                    disableOptions(qDiv);
                 };
                 qDiv.appendChild(optBtn);
             });
             questionContainer.appendChild(qDiv);
         });
+    }
+
+    // Tüm seçenekleri devre dışı bırakma
+    function disableOptions(questionDiv) {
+        const buttons = questionDiv.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.disabled = true);
     }
 
     // Link oluşturma
@@ -60,12 +117,10 @@
             q.options.forEach((opt, i) => {
                 const optBtn = document.createElement('button');
                 optBtn.innerText = opt;
+                optBtn.className = 'option-btn';
                 optBtn.onclick = () => {
-                    if (i === parseInt(correctAnswers[index])) {
-                        optBtn.style.backgroundColor = 'green'; // Doğru tahmin
-                    } else {
-                        optBtn.style.backgroundColor = 'red';   // Yanlış tahmin
-                    }
+                    optBtn.dataset.selected = i; // Seçilen seçeneği sakla
+                    disableOptions(qDiv); // Diğer seçenekleri devre dışı bırak
                 };
                 qDiv.appendChild(optBtn);
             });
@@ -73,24 +128,41 @@
         });
     }
 
-    // Sonucu kontrol etme
+    // Sonucu gösterme
+    function revealResults() {
+        let score = 0;
+        const guessContainer = document.getElementById('guess-questions');
+        const guessButtons = guessContainer.querySelectorAll('.option-btn');
+        guessButtons.forEach((btn, index) => {
+            const qIndex = Math.floor(index / questions[0].options.length);
+            const correctAnswer = parseInt(questions[qIndex].correctAnswer);
+            if (btn.dataset.selected == correctAnswer) {
+                btn.classList.add('correct');
+                score++;
+            } else if (btn.dataset.selected) {
+                btn.classList.add('incorrect');
+            }
+        });
+        document.getElementById('score').innerText = `Doğru Sayısı: ${score}/${questions.length}`;
+    }
+
+    // URL parametresine göre hangi bölümü göstereceğimizi kontrol etme
     function checkAnswers() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('answers')) {
             const correctAnswers = urlParams.get('answers').split(",");
+            correctAnswers.forEach((ans, index) => {
+                questions[index].correctAnswer = ans;
+            });
             renderGuessQuestions(correctAnswers);
             document.getElementById('guess-section').style.display = 'block';
-        }
-    }
-
-    // URL parametresine göre hangi bölümü göstereceğimizi kontrol etme
-    window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('answers')) {
-            document.getElementById('quiz').style.display = 'none';
-            checkAnswers();
         } else {
             renderQuestions();
         }
-    };
+    }
+
+    window.onload = checkAnswers;
 </script>
+
+</body>
+</html>
