@@ -47,7 +47,7 @@
 <body>
 
 <div id="quiz">
-    <h1>Arkadaşlık Testi</h1>
+    <h1>pipiQuiz - Arkadaşlık Testi</h1>
     <div id="questions"></div>
     <button onclick="generateLink()">Linki Oluştur</button>
 </div>
@@ -69,7 +69,13 @@
         { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], correctAnswer: null },
         { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"], correctAnswer: null },
         { question: "Yaz mı kış mı?", options: ["Yaz", "Kış"], correctAnswer: null },
-        { question: "Kahve mi çay mı?", options: ["Kahve", "Çay"], correctAnswer: null }
+        { question: "Kahve mi çay mı?", options: ["Kahve", "Çay"], correctAnswer: null },
+        { question: "Favori mevsimin nedir?", options: ["İlkbahar", "Yaz", "Sonbahar", "Kış"], correctAnswer: null },
+        { question: "En sevdiğin yemek türü?", options: ["Fast food", "Ev yemeği", "Deniz ürünleri"], correctAnswer: null },
+        { question: "Sabah mı akşam mı daha verimlisin?", options: ["Sabah", "Akşam"], correctAnswer: null },
+        { question: "Hangi tür film izlemekten hoşlanırsın?", options: ["Komedi", "Aksiyon", "Dram", "Bilim Kurgu"], correctAnswer: null },
+        { question: "Hafta sonunu nasıl geçirmek istersin?", options: ["Evde dinlenmek", "Dışarıda gezmek", "Arkadaşlarla vakit geçirmek"], correctAnswer: null },
+        { question: "Hangi müzik türünü seversin?", options: ["Pop", "Rock", "Caz", "Klasik"], correctAnswer: null }
     ];
     let answers = [];
 
@@ -85,7 +91,7 @@
                 optBtn.className = 'option-btn';
                 optBtn.onclick = () => {
                     answers[index] = i;
-                    questions[index].correctAnswer = i; // Doğru cevabı kaydet
+                    questions[index].correctAnswer = i;
                     disableOptions(qDiv);
                 };
                 qDiv.appendChild(optBtn);
@@ -119,8 +125,8 @@
                 optBtn.innerText = opt;
                 optBtn.className = 'option-btn';
                 optBtn.onclick = () => {
-                    optBtn.dataset.selected = i; // Seçilen seçeneği sakla
-                    disableOptions(qDiv); // Diğer seçenekleri devre dışı bırak
+                    optBtn.dataset.selected = i;
+                    disableOptions(qDiv);
                 };
                 qDiv.appendChild(optBtn);
             });
