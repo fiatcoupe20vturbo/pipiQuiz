@@ -2,21 +2,29 @@
 <div id="quiz">
     <h1>pipiQuiz - Arkadaşlık Testi</h1>
     <div id="questions"></div>
-    <button onclick="showResult()">Testi Bitir</button>
+    <button onclick="generateLink()">Linki Oluştur</button>
 </div>
-<div id="result" style="display: none;">
-    <h2>Sonucun:</h2>
-    <p id="score"></p>
+
+<div id="share-link" style="display: none;">
+    <h2>Arkadaşlarınla Paylaş:</h2>
     <p id="link"></p>
+</div>
+
+<div id="guess-section" style="display: none;">
+    <h2>Tahmin Et</h2>
+    <div id="guess-questions"></div>
+    <button onclick="checkAnswers()">Sonucu Gör</button>
+    <p id="score"></p>
 </div>
 
 <script>
     const questions = [
-        { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], points: [10, 5, 3] },
-        { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"], points: [10, 5, 3] }
+        { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"] },
+        { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"] }
     ];
-    let score = 0;
+    let answers = [];
 
+    // Soruları gösterme ve cevapları kaydetme
     function renderQuestions() {
         const questionContainer = document.getElementById('questions');
         questions.forEach((q, index) => {
@@ -26,7 +34,7 @@
                 const optBtn = document.createElement('button');
                 optBtn.innerText = opt;
                 optBtn.onclick = () => {
-                    score += q.points[i];
+                    answers[index] = i;
                     optBtn.disabled = true;
                 };
                 qDiv.appendChild(optBtn);
@@ -35,25 +43,54 @@
         });
     }
 
-    function showResult() {
-        const resultDiv = document.getElementById('result');
-        resultDiv.style.display = 'block';
-        document.getElementById('score').innerText = `Toplam Puanın: ${score}`;
-        const shareLink = `${window.location.origin}/?score=${score}`;
-        document.getElementById('link').innerHTML = `Arkadaşlarınla paylaş: <a href="${shareLink}">${shareLink}</a>`;
+    // Link oluşturma
+    function generateLink() {
+        const answerStr = answers.join(",");
+        const shareLink = `${window.location.origin}${window.location.pathname}?answers=${answerStr}`;
+        document.getElementById('link').innerHTML = `<a href="${shareLink}">${shareLink}</a>`;
+        document.getElementById('share-link').style.display = 'block';
     }
 
-    function checkScore() {
+    // Tahmin sorularını gösterme
+    function renderGuessQuestions(correctAnswers) {
+        const guessContainer = document.getElementById('guess-questions');
+        questions.forEach((q, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.innerHTML = `<p>${q.question}</p>`;
+            q.options.forEach((opt, i) => {
+                const optBtn = document.createElement('button');
+                optBtn.innerText = opt;
+                optBtn.onclick = () => {
+                    if (i === parseInt(correctAnswers[index])) {
+                        optBtn.style.backgroundColor = 'green'; // Doğru tahmin
+                    } else {
+                        optBtn.style.backgroundColor = 'red';   // Yanlış tahmin
+                    }
+                };
+                qDiv.appendChild(optBtn);
+            });
+            guessContainer.appendChild(qDiv);
+        });
+    }
+
+    // Sonucu kontrol etme
+    function checkAnswers() {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('score')) {
-            const score = urlParams.get('score');
-            document.getElementById('quiz').style.display = 'none';
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('score').innerText = `Aldığın Puan: ${score}`;
-        } else {
-            renderQuestions();
+        if (urlParams.has('answers')) {
+            const correctAnswers = urlParams.get('answers').split(",");
+            renderGuessQuestions(correctAnswers);
+            document.getElementById('guess-section').style.display = 'block';
         }
     }
 
-    window.onload = checkScore;
+    // URL parametresine göre hangi bölümü göstereceğimizi kontrol etme
+    window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('answers')) {
+            document.getElementById('quiz').style.display = 'none';
+            checkAnswers();
+        } else {
+            renderQuestions();
+        }
+    };
 </script>
