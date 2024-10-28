@@ -16,7 +16,7 @@
             background-color: #333;
             color: #f4f4f9;
         }
-        #quiz, #share-link, #guess-section, #leaderboard {
+        #quiz, #share-link, #guess-section {
             max-width: 600px;
             margin: auto;
             padding: 20px;
@@ -26,7 +26,7 @@
             margin-top: 20px;
             transition: background 0.3s;
         }
-        body.dark #quiz, body.dark #share-link, body.dark #guess-section, body.dark #leaderboard {
+        body.dark #quiz, body.dark #share-link, body.dark #guess-section {
             background: #444;
         }
         button {
@@ -62,10 +62,6 @@
             color: white;
             cursor: pointer;
         }
-        #leaderboard {
-            margin-top: 40px;
-            text-align: left;
-        }
     </style>
 </head>
 <body>
@@ -91,17 +87,6 @@
     <p id="score"></p>
 </div>
 
-<div id="leaderboard" style="display: none;">
-    <h2>Leaderboard</h2>
-    <table id="leaderboard-table">
-        <tr>
-            <th>İsim</th>
-            <th>Doğru</th>
-            <th>Yanlış</th>
-        </tr>
-    </table>
-</div>
-
 <script>
     const questions = [
         { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], correctAnswer: null },
@@ -116,7 +101,6 @@
         { question: "Hangi müzik türünü seversin?", options: ["Pop", "Rock", "Caz", "Klasik"], correctAnswer: null }
     ];
     let answers = [];
-    let leaderboard = [];
 
     function renderQuestions() {
         const questionContainer = document.getElementById('questions');
@@ -150,14 +134,11 @@
         const shareLink = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(userName)}&answers=${encodedAnswers}`;
         document.getElementById('link').innerHTML = `<a href="${shareLink}">${shareLink}</a>`;
         document.getElementById('share-link').style.display = 'block';
-        renderGuessQuestions(answers, userName);
-        document.getElementById('guess-section').style.display = 'block';
     }
 
-    function renderGuessQuestions(encodedAnswers, userName) {
+    function renderGuessQuestions(correctAnswers, userName) {
         const guessContainer = document.getElementById('guess-questions');
         guessContainer.innerHTML = `<h3>${userName} neleri seviyor?</h3>`;
-        const decodedAnswers = atob(encodedAnswers).split(",");
         questions.forEach((q, index) => {
             const qDiv = document.createElement('div');
             qDiv.innerHTML = `<p>${q.question}</p>`;
@@ -177,7 +158,6 @@
 
     function revealResults() {
         let score = 0;
-        let wrongAnswers = 0;
         const guessContainer = document.getElementById('guess-questions');
         const guessButtons = guessContainer.querySelectorAll('.option-btn');
         guessButtons.forEach((btn, index) => {
@@ -188,40 +168,33 @@
                 score++;
             } else if (btn.dataset.selected) {
                 btn.classList.add('incorrect');
-                wrongAnswers++;
             }
         });
-
-        const userName = document.getElementById('user-name').value;
-        updateLeaderboard(userName, score, wrongAnswers);
         document.getElementById('score').innerText = `Doğru Sayısı: ${score}/${questions.length}`;
-        document.getElementById('leaderboard').style.display = 'block';
-        renderLeaderboard();
     }
 
-    function updateLeaderboard(name, correct, incorrect) {
-        leaderboard.push({ name, correct, incorrect });
-    }
-
-    function renderLeaderboard() {
-        const leaderboardTable = document.getElementById('leaderboard-table');
-        leaderboardTable.innerHTML = `<tr>
-            <th>İsim</th>
-            <th>Doğru</th>
-            <th>Yanlış</th>
-        </tr>`;
-        leaderboard.forEach(entry => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${entry.name}</td><td>${entry.correct}</td><td>${entry.incorrect}</td>`;
-            leaderboardTable.appendChild(row);
-        });
+    function checkAnswers() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('answers')) {
+            const userName = urlParams.get('name');
+            const encodedAnswers = urlParams.get('answers');
+            const decodedAnswers = atob(encodedAnswers);
+            const correctAnswers = decodedAnswers.split(",");
+            correctAnswers.forEach((ans, index) => {
+                questions[index].correctAnswer = ans;
+            });
+            renderGuessQuestions(correctAnswers, userName);
+            document.getElementById('guess-section').style.display = 'block';
+        } else {
+            renderQuestions();
+        }
     }
 
     function toggleTheme() {
         document.body.classList.toggle('dark');
     }
 
-    renderQuestions();
+    window.onload = checkAnswers;
 </script>
 
 </body>
