@@ -150,11 +150,14 @@
         const shareLink = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(userName)}&answers=${encodedAnswers}`;
         document.getElementById('link').innerHTML = `<a href="${shareLink}">${shareLink}</a>`;
         document.getElementById('share-link').style.display = 'block';
+        renderGuessQuestions(answers, userName);
+        document.getElementById('guess-section').style.display = 'block';
     }
 
-    function renderGuessQuestions(correctAnswers, userName) {
+    function renderGuessQuestions(encodedAnswers, userName) {
         const guessContainer = document.getElementById('guess-questions');
         guessContainer.innerHTML = `<h3>${userName} neleri seviyor?</h3>`;
+        const decodedAnswers = atob(encodedAnswers).split(",");
         questions.forEach((q, index) => {
             const qDiv = document.createElement('div');
             qDiv.innerHTML = `<p>${q.question}</p>`;
@@ -188,7 +191,7 @@
                 wrongAnswers++;
             }
         });
-        
+
         const userName = document.getElementById('user-name').value;
         updateLeaderboard(userName, score, wrongAnswers);
         document.getElementById('score').innerText = `Doğru Sayısı: ${score}/${questions.length}`;
