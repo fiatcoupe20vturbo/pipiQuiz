@@ -1,0 +1,59 @@
+<!-- index.html -->
+<div id="quiz">
+    <h1>pipiQuiz - Arkadaşlık Testi</h1>
+    <div id="questions"></div>
+    <button onclick="showResult()">Testi Bitir</button>
+</div>
+<div id="result" style="display: none;">
+    <h2>Sonucun:</h2>
+    <p id="score"></p>
+    <p id="link"></p>
+</div>
+
+<script>
+    const questions = [
+        { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], points: [10, 5, 3] },
+        { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"], points: [10, 5, 3] }
+    ];
+    let score = 0;
+
+    function renderQuestions() {
+        const questionContainer = document.getElementById('questions');
+        questions.forEach((q, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.innerHTML = `<p>${q.question}</p>`;
+            q.options.forEach((opt, i) => {
+                const optBtn = document.createElement('button');
+                optBtn.innerText = opt;
+                optBtn.onclick = () => {
+                    score += q.points[i];
+                    optBtn.disabled = true;
+                };
+                qDiv.appendChild(optBtn);
+            });
+            questionContainer.appendChild(qDiv);
+        });
+    }
+
+    function showResult() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        document.getElementById('score').innerText = `Toplam Puanın: ${score}`;
+        const shareLink = `${window.location.origin}/?score=${score}`;
+        document.getElementById('link').innerHTML = `Arkadaşlarınla paylaş: <a href="${shareLink}">${shareLink}</a>`;
+    }
+
+    function checkScore() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('score')) {
+            const score = urlParams.get('score');
+            document.getElementById('quiz').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('score').innerText = `Aldığın Puan: ${score}`;
+        } else {
+            renderQuestions();
+        }
+    }
+
+    window.onload = checkScore;
+</script>
