@@ -55,18 +55,22 @@
             position: fixed;
             top: 20px;
             right: 20px;
+            background: none;
             border: none;
-            border-radius: 5px;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
             cursor: pointer;
+            outline: none;
+        }
+        #theme-toggle img {
+            width: 30px; /* İstediğin boyutu ayarlayabilirsin */
+            height: 30px; /* İstediğin boyutu ayarlayabilirsin */
         }
     </style>
 </head>
 <body>
 
-<button id="theme-toggle" onclick="toggleTheme()">Tema Değiştir</button>
+<button id="theme-toggle" onclick="toggleTheme()">
+    <img id="theme-icon" src="images/sun.png" alt="Tema Değiştir">
+</button>
 
 <div id="quiz">
     <h1>pipiQuiz - Arkadaşlık Testi</h1>
@@ -192,6 +196,8 @@
 
     function toggleTheme() {
         document.body.classList.toggle('dark');
+        const themeIcon = document.getElementById('theme-icon');
+        themeIcon.src = document.body.classList.contains('dark') ? 'images/moon.png' : 'images/sun.png';
     }
 
     window.onload = checkAnswers;
