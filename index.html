@@ -17,7 +17,7 @@
             color: #f4f4f9;
         }
         h1 {
-            background-color: rgba(255, 255, 255, 0.8); /* Aydınlık tema arka plan rengi */
+            background-color: rgba(255, 255, 255, 0.8);
             color: #333;
             display: inline-block;
             padding: 10px;
@@ -26,7 +26,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
         body.dark h1 {
-            background-color: rgba(50, 50, 50, 0.8); /* Karanlık tema arka plan rengi */
+            background-color: rgba(50, 50, 50, 0.8);
             color: #f4f4f9;
         }
         #quiz, #share-link, #guess-section {
@@ -97,7 +97,7 @@
 </h1>
 
 <button id="theme-toggle" onclick="toggleTheme()">
-    <img id="theme-icon" src="images/sun.png" alt="Tema Değiştir">
+    <img id="theme-icon" src="images/moon.png" alt="Tema Değiştir">
 </button>
 
 <div id="quiz">
@@ -224,7 +224,7 @@
     function toggleTheme() {
         document.body.classList.toggle('dark');
         const themeIcon = document.getElementById('theme-icon');
-        themeIcon.src = document.body.classList.contains('dark') ? 'images/moon.png' : 'images/sun.png';
+        themeIcon.src = document.body.classList.contains('dark') ? 'images/moon.png' : 'images/sun.png'; // Düzeltildi
     }
 
     document.addEventListener("DOMContentLoaded", checkAnswers);
