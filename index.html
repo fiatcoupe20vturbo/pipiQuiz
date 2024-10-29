@@ -16,6 +16,19 @@
             background-color: #333;
             color: #f4f4f9;
         }
+        h1 {
+            background-color: rgba(255, 255, 255, 0.8); /* Aydınlık tema arka plan rengi */
+            color: #333;
+            display: inline-block;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark h1 {
+            background-color: rgba(50, 50, 50, 0.8); /* Karanlık tema arka plan rengi */
+            color: #f4f4f9;
+        }
         #quiz, #share-link, #guess-section {
             max-width: 600px;
             margin: auto;
@@ -78,8 +91,8 @@
 
 <h1>
     pipiQuiz - Arkadaşlık Testi
-    <a id="github-link" href="https://github.com/fiatcoupe20vturbo/pipiQuiz" target="_blank">
-        <img src="images/github.png" alt="GitHub">
+    <a id="github-link" href="https://github.com/kullaniciadi/repoadi" target="_blank">
+        <img src="images/github-icon.png" alt="GitHub">
     </a>
 </h1>
 
@@ -211,11 +224,10 @@
     function toggleTheme() {
         document.body.classList.toggle('dark');
         const themeIcon = document.getElementById('theme-icon');
-        themeIcon.src = document.body.classList.contains('dark') ? 'images/sun.png' : 'images/moon.png';
+        themeIcon.src = document.body.classList.contains('dark') ? 'images/moon.png' : 'images/sun.png';
     }
 
-    window.onload = checkAnswers;
+    document.addEventListener("DOMContentLoaded", checkAnswers);
 </script>
-
 </body>
 </html>
