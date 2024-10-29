@@ -16,6 +16,10 @@
             background-color: #333;
             color: #f4f4f9;
         }
+        body.white {
+            background-color: #fff;
+            color: #333;
+        }
         h1 {
             background-color: rgba(255, 255, 255, 0.8);
             color: #333;
@@ -33,14 +37,14 @@
             max-width: 600px;
             margin: auto;
             padding: 20px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9); /* Yumuşak beyaz arka plan */
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Daha belirgin gölge */
             margin-top: 20px;
             transition: background 0.3s;
         }
         body.dark #quiz, body.dark #share-link, body.dark #guess-section {
-            background: #444;
+            background: rgba(50, 50, 50, 0.9); /* Karanlık mod arka planı */
         }
         button {
             padding: 10px 20px;
@@ -87,7 +91,7 @@
         }
     </style>
 </head>
-<body>
+<body class="white">
 
 <h1>
     pipiQuiz - Arkadaşlık Testi
@@ -97,7 +101,7 @@
 </h1>
 
 <button id="theme-toggle" onclick="toggleTheme()">
-    <img id="theme-icon" src="images/moon.png" alt="Tema Değiştir">
+    <img id="theme-icon" src="images/sun.png" alt="Tema Değiştir">
 </button>
 
 <div id="quiz">
@@ -195,13 +199,13 @@
             const qIndex = Math.floor(index / questions[0].options.length);
             const correctAnswer = parseInt(questions[qIndex].correctAnswer);
             if (btn.dataset.selected == correctAnswer) {
-                btn.classList.add('correct');
                 score++;
-            } else if (btn.dataset.selected) {
+                btn.classList.add('correct');
+            } else {
                 btn.classList.add('incorrect');
             }
         });
-        document.getElementById('score').innerText = `Doğru Sayısı: ${score}/${questions.length}`;
+        document.getElementById('score').innerText = `Sonuç: ${score} doğru cevap.`;
     }
 
     function checkAnswers() {
@@ -223,6 +227,7 @@
 
     function toggleTheme() {
         document.body.classList.toggle('dark');
+        document.body.classList.toggle('white');
         const themeIcon = document.getElementById('theme-icon');
         themeIcon.src = document.body.classList.contains('dark') ? 'images/moon.png' : 'images/sun.png';
     }
