@@ -61,19 +61,33 @@
             outline: none;
         }
         #theme-toggle img {
-            width: 30px; /* İstediğin boyutu ayarlayabilirsin */
-            height: 30px; /* İstediğin boyutu ayarlayabilirsin */
+            width: 30px;
+            height: 30px;
+        }
+        #github-link {
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        #github-link img {
+            width: 30px;
+            height: 30px;
         }
     </style>
 </head>
 <body>
+
+<h1>
+    pipiQuiz - Arkadaşlık Testi
+    <a id="github-link" href="https://github.com/fiatcoupe20vturbo/pipiQuiz" target="_blank">
+        <img src="images/github.png" alt="GitHub">
+    </a>
+</h1>
 
 <button id="theme-toggle" onclick="toggleTheme()">
     <img id="theme-icon" src="images/sun.png" alt="Tema Değiştir">
 </button>
 
 <div id="quiz">
-    <h1>pipiQuiz - Arkadaşlık Testi</h1>
     <input type="text" id="user-name" placeholder="Adınızı girin" required>
     <div id="questions"></div>
     <button onclick="generateLink()">Linki Oluştur</button>
@@ -197,7 +211,7 @@
     function toggleTheme() {
         document.body.classList.toggle('dark');
         const themeIcon = document.getElementById('theme-icon');
-        themeIcon.src = document.body.classList.contains('dark') ? 'images/moon.png' : 'images/sun.png';
+        themeIcon.src = document.body.classList.contains('dark') ? 'images/sun.png' : 'images/moon.png';
     }
 
     window.onload = checkAnswers;
