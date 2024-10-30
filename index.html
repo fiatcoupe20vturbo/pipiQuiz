@@ -5,104 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>pipiQuiz - Arkadaşlık Testi</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(0deg, #408080 0%, #400040 100%);
-            color: #333;
-            text-align: center;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        body.dark {
-            background-color: #333;
-            color: #f4f4f9;
-        }
-        body.white {
-            background-color: #fff;
-            color: #333;
-        }
-        h1 {
-            background-color: rgba(255, 255, 255, 0.8);
-            color: #333;
-            display: inline-block;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 20px 0;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        body.dark h1 {
-            background-color: rgba(50, 50, 50, 0.8);
-            color: #f4f4f9;
-        }
-        #quiz, #share-link, #guess-section {
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
-        body.dark #quiz, body.dark #share-link, body.dark #guess-section {
-            background: rgba(50, 50, 50, 0.9);
-        }
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            font-size: 16px;
-        }
-        button:disabled {
-            background-color: #ccc;
-        }
-        .option-btn {
-            background-color: #2196F3;
-        }
-        .option-btn.correct {
-            background-color: green;
-        }
-        .option-btn.incorrect {
-            background-color: red;
-        }
-        #theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            outline: none;
-        }
-        #theme-toggle img {
-            width: 30px;
-            height: 30px;
-        }
-        #github-link {
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-        #github-link img {
-            width: 30px;
-            height: 30px;
-        }
+        /* Stil ayarları burada */
     </style>
 </head>
 <body class="white">
-
-<h1>
-    pipiQuiz - Arkadaşlık Testi
-    <a id="github-link" href="https://github.com/fiatcoupe20vturbo/pipiQuiz" target="_blank">
-        <img src="images/github.png" alt="GitHub">
-    </a>
-</h1>
-
-<button id="theme-toggle" onclick="toggleTheme()">
-    <img id="theme-icon" src="images/moond.png" alt="Tema Değiştir">
-</button>
+<h1>pipiQuiz - Arkadaşlık Testi</h1>
+<button id="theme-toggle" onclick="toggleTheme()">Tema Değiştir</button>
 
 <div id="quiz">
     <input type="text" id="user-name" placeholder="Adınızı girin" required>
@@ -122,18 +30,17 @@
     <p id="score"></p>
 </div>
 
+<div id="leaderboard" style="display: none;">
+    <h2>Leaderboard</h2>
+    <ul id="leaderboard-list"></ul>
+</div>
+
 <script>
     const questions = [
         { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], correctAnswer: null },
         { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"], correctAnswer: null },
         { question: "Yaz mı kış mı?", options: ["Yaz", "Kış"], correctAnswer: null },
         { question: "Kahve mi çay mı?", options: ["Kahve", "Çay"], correctAnswer: null },
-        { question: "Favori mevsimin nedir?", options: ["İlkbahar", "Yaz", "Sonbahar", "Kış"], correctAnswer: null },
-        { question: "En sevdiğin yemek türü?", options: ["Fast food", "Ev yemeği", "Deniz ürünleri"], correctAnswer: null },
-        { question: "Sabah mı akşam mı daha verimlisin?", options: ["Sabah", "Akşam"], correctAnswer: null },
-        { question: "Hangi tür film izlemekten hoşlanırsın?", options: ["Komedi", "Aksiyon", "Dram", "Bilim Kurgu"], correctAnswer: null },
-        { question: "Hafta sonunu nasıl geçirmek istersin?", options: ["Evde dinlenmek", "Dışarıda gezmek", "Arkadaşlarla vakit geçirmek"], correctAnswer: null },
-        { question: "Hangi müzik türünü seversin?", options: ["Pop", "Rock", "Caz", "Klasik"], correctAnswer: null }
     ];
     let answers = [];
 
@@ -206,6 +113,29 @@
             }
         });
         document.getElementById('score').innerText = `Sonuç: ${score} doğru cevap.`;
+        updateLeaderboard(score);
+    }
+
+    function updateLeaderboard(score) {
+        const userName = new URLSearchParams(window.location.search).get("name") || "Bilinmeyen";
+        let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        leaderboard.push({ name: userName, score: score });
+        leaderboard.sort((a, b) => b.score - a.score);
+        leaderboard = leaderboard.slice(0, 10);
+        localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+        displayLeaderboard();
+    }
+
+    function displayLeaderboard() {
+        const leaderboardList = document.getElementById("leaderboard-list");
+        leaderboardList.innerHTML = "";
+        const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        leaderboard.forEach(entry => {
+            const listItem = document.createElement("li");
+            listItem.innerText = `${entry.name}: ${entry.score} puan`;
+            leaderboardList.appendChild(listItem);
+        });
+        document.getElementById("leaderboard").style.display = "block";
     }
 
     function checkAnswers() {
@@ -220,6 +150,7 @@
             });
             renderGuessQuestions(correctAnswers, userName);
             document.getElementById('guess-section').style.display = 'block';
+            displayLeaderboard();
         } else {
             renderQuestions();
         }
@@ -228,12 +159,6 @@
     function toggleTheme() {
         document.body.classList.toggle("dark");
         document.body.classList.toggle("white");
-        const themeIcon = document.getElementById("theme-icon");
-        if (document.body.classList.contains("dark")) {
-            themeIcon.src = "images/sun.png";
-        } else {
-            themeIcon.src = "images/moond.png";
-        }
     }
 
     document.addEventListener("DOMContentLoaded", checkAnswers);
