@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pipiQuiz - Arkadaşlık Testi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(0deg, #408080 0%, #400040 100%);
+            color: #333;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark {
+            background-color: #333;
+            color: #f4f4f9;
+        }
+        body.white {
+            background-color: #fff;
+            color: #333;
+        }
+        h1 {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #333;
+            display: inline-block;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark h1 {
+            background-color: rgba(50, 50, 50, 0.8);
+            color: #f4f4f9;
+        }
+        #quiz, #share-link, #guess-section {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        body.dark #quiz, body.dark #share-link, body.dark #guess-section {
+            background: rgba(50, 50, 50, 0.9);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+        .option-btn {
+            background-color: #2196F3;
+        }
+        .option-btn.correct {
+            background-color: green;
+        }
+        .option-btn.incorrect {
+            background-color: red;
+        }
+        #theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+        }
+        #theme-toggle img {
+            width: 30px;
+            height: 30px;
+        }
+        #github-link {
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        #github-link img {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
+</head>
+<body class="white">
+
+<h1>
+    pipiQuiz - Arkadaşlık Testi
+    <a id="github-link" href="https://github.com/fiatcoupe20vturbo/pipiQuiz" target="_blank">
+        <img src="images/github.png" alt="GitHub">
+    </a>
+</h1>
+
+<button id="theme-toggle" onclick="toggleTheme()">
+    <img id="theme-icon" src="images/moond.png" alt="Tema Değiştir">
+</button>
+
+<div id="quiz">
+    <input type="text" id="user-name" placeholder="Adınızı girin" required>
+    <div id="questions"></div>
+    <button onclick="generateLink()">Linki Oluştur</button>
+</div>
+
+<div id="share-link" style="display: none;">
+    <h2>Arkadaşlarınla Paylaş:</h2>
+    <p id="link"></p>
+</div>
+
+<div id="guess-section" style="display: none;">
+    <h2>Tahmin Et</h2>
+    <div id="guess-questions"></div>
+    <button onclick="revealResults()">Sonucu Gör</button>
+    <p id="score"></p>
+</div>
+
+<script>
+    const questions = [
+        { question: "En sevdiğin renk?", options: ["Kırmızı", "Mavi", "Yeşil"], correctAnswer: null },
+        { question: "En sevdiğin hayvan?", options: ["Köpek", "Kedi", "Kuş"], correctAnswer: null },
+        { question: "Yaz mı kış mı?", options: ["Yaz", "Kış"], correctAnswer: null },
+        { question: "Kahve mi çay mı?", options: ["Kahve", "Çay"], correctAnswer: null },
+        { question: "Favori mevsimin nedir?", options: ["İlkbahar", "Yaz", "Sonbahar", "Kış"], correctAnswer: null },
+        { question: "En sevdiğin yemek türü?", options: ["Fast food", "Ev yemeği", "Deniz ürünleri"], correctAnswer: null },
+        { question: "Sabah mı akşam mı daha verimlisin?", options: ["Sabah", "Akşam"], correctAnswer: null },
+        { question: "Hangi tür film izlemekten hoşlanırsın?", options: ["Komedi", "Aksiyon", "Dram", "Bilim Kurgu"], correctAnswer: null },
+        { question: "Hafta sonunu nasıl geçirmek istersin?", options: ["Evde dinlenmek", "Dışarıda gezmek", "Arkadaşlarla vakit geçirmek"], correctAnswer: null },
+        { question: "Hangi müzik türünü seversin?", options: ["Pop", "Rock", "Caz", "Klasik"], correctAnswer: null }
+    ];
+    let answers = [];
+
+    function renderQuestions() {
+        const questionContainer = document.getElementById('questions');
+        questions.forEach((q, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.innerHTML = `<p>${q.question}</p>`;
+            q.options.forEach((opt, i) => {
+                const optBtn = document.createElement('button');
+                optBtn.innerText = opt;
+                optBtn.className = 'option-btn';
+                optBtn.onclick = () => {
+                    answers[index] = i;
+                    questions[index].correctAnswer = i;
+                    disableOptions(qDiv);
+                };
+                qDiv.appendChild(optBtn);
+            });
+            questionContainer.appendChild(qDiv);
+        });
+    }
+
+    function disableOptions(questionDiv) {
+        const buttons = questionDiv.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.disabled = true);
+    }
+
+    function generateLink() {
+        const userName = document.getElementById('user-name').value;
+        const answerStr = answers.join(",");
+        const encodedAnswers = btoa(answerStr);
+        const shareLink = `${window.location.origin}${window.location.pathname}?name=${encodeURIComponent(userName)}&answers=${encodedAnswers}`;
+        document.getElementById('link').innerHTML = `<a href="${shareLink}">${shareLink}</a>`;
+        document.getElementById('share-link').style.display = 'block';
+    }
+
+    function renderGuessQuestions(correctAnswers, userName) {
+        const guessContainer = document.getElementById('guess-questions');
+        guessContainer.innerHTML = `<h3>${userName} neleri seviyor?</h3>`;
+        questions.forEach((q, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.innerHTML = `<p>${q.question}</p>`;
+            q.options.forEach((opt, i) => {
+                const optBtn = document.createElement('button');
+                optBtn.innerText = opt;
+                optBtn.className = 'option-btn';
+                optBtn.onclick = () => {
+                    optBtn.dataset.selected = i;
+                    disableOptions(qDiv);
+                };
+                qDiv.appendChild(optBtn);
+            });
+            guessContainer.appendChild(qDiv);
+        });
+    }
+
+    function revealResults() {
+        let score = 0;
+        const guessContainer = document.getElementById('guess-questions');
+        const guessButtons = guessContainer.querySelectorAll('.option-btn');
+        guessButtons.forEach((btn, index) => {
+            const qIndex = Math.floor(index / questions[0].options.length);
+            const correctAnswer = parseInt(questions[qIndex].correctAnswer);
+            if (btn.dataset.selected == correctAnswer) {
+                score++;
+                btn.classList.add('correct');
+            } else {
+                btn.classList.add('incorrect');
+            }
+        });
+        document.getElementById('score').innerText = `Sonuç: ${score} doğru cevap.`;
+    }
+
+    function checkAnswers() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('answers')) {
+            const userName = urlParams.get('name');
+            const encodedAnswers = urlParams.get('answers');
+            const decodedAnswers = atob(encodedAnswers);
+            const correctAnswers = decodedAnswers.split(",");
+            correctAnswers.forEach((ans, index) => {
+                questions[index].correctAnswer = ans;
+            });
+            renderGuessQuestions(correctAnswers, userName);
+            document.getElementById('guess-section').style.display = 'block';
+        } else {
+            renderQuestions();
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle("dark");
+        document.body.classList.toggle("white");
+        const themeIcon = document.getElementById("theme-icon");
+        if (document.body.classList.contains("dark")) {
+            themeIcon.src = "images/sun.png";
+        } else {
+            themeIcon.src = "images/moond.png";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", checkAnswers);
+</script>
+</body>
+</html>
