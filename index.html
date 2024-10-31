@@ -48,6 +48,19 @@
         body.dark #quiz, body.dark #share-link, body.dark #guess-section, body.dark #leaderboard {
             background: rgba(40, 40, 40, 0.95);
         }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark input[type="text"] {
+            background-color: rgba(50, 50, 50, 0.85);
+            color: #f4f4f9;
+            border: 1px solid #777;
+        }
         button {
             padding: 12px 25px;
             margin: 10px;
@@ -128,7 +141,7 @@
 </button>
 
 <div id="quiz">
-    <input type="text" id="user-name" placeholder="Adınızı girin" required style="width: 80%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
+    <input type="text" id="user-name" placeholder="Adınızı girin" required>
     <div id="questions"></div>
     <button onclick="generateLink()">Linki Oluştur</button>
 </div>
@@ -140,7 +153,7 @@
 
 <div id="guess-section" style="display: none;">
     <h2>Tahmin Et</h2>
-    <input type="text" id="guess-name" placeholder="Adınızı girin" required style="width: 80%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
+    <input type="text" id="guess-name" placeholder="Adınızı girin" required>
     <div id="guess-questions"></div>
     <button onclick="revealResults()">Sonucu Gör</button>
     <p id="score"></p>
@@ -148,9 +161,7 @@
 
 <div id="leaderboard" style="display: none;">
     <h2>En İyi Skorlar</h2>
-    <ul id="leaderboard-list">
-        
-    </ul>
+    <ul id="leaderboard-list"></ul>
 </div>
 
 <script>
@@ -202,83 +213,23 @@
         document.getElementById('share-link').style.display = 'block';
     }
 
-    function renderGuessQuestions() {
-        const params = new URLSearchParams(window.location.search);
-        const encodedAnswers = params.get('answers');
-        if (!encodedAnswers) return;
-        const correctAnswers = atob(encodedAnswers).split(",").map(Number);
-        const questionContainer = document.getElementById('guess-questions');
-        questions.forEach((q, index) => {
-            const qDiv = document.createElement('div');
-            qDiv.innerHTML = `<p>${q.question}</p>`;
-            q.options.forEach((opt, i) => {
-                const optBtn = document.createElement('button');
-                optBtn.innerText = opt;
-                optBtn.className = 'option-btn';
-                optBtn.onclick = () => {
-                    answers[index] = i;
-                    disableOptions(qDiv);
-                };
-                qDiv.appendChild(optBtn);
-            });
-            questionContainer.appendChild(qDiv);
-        });
-        document.getElementById('guess-section').style.display = 'block';
-    }
-
     function revealResults() {
-        const correctAnswers = atob(new URLSearchParams(window.location.search).get('answers')).split(",").map(Number);
-        let score = 0;
-        answers.forEach((ans, index) => {
-            if (ans === correctAnswers[index]) {
-                score++;
-            }
-        });
-        document.getElementById('score').innerText = `Skorunuz: ${score} / ${questions.length}`;
-        addToLeaderboard(score);
-    }
-
-    function addToLeaderboard(score) {
-        const leaderboard = document.getElementById('leaderboard-list');
-        const scoreItem = document.createElement('li');
-        scoreItem.innerText = `Skor: ${score} - ${document.getElementById('guess-name').value}`;
-        leaderboard.appendChild(scoreItem);
-        document.getElementById('leaderboard').style.display = 'block';
+        const guessName = document.getElementById('guess-name').value;
+        const score = answers.filter((a, index) => a === questions[index].correctAnswer).length;
+        document.getElementById('score').innerText = `${guessName}, ${score} doğru cevap verdin!`;
     }
 
     function toggleTheme() {
         const body = document.body;
         const themeIcon = document.getElementById('theme-icon');
-        if (body.classList.contains('white')) {
-            body.classList.replace('white', 'dark');
-            themeIcon.src = 'images/sun.png';
-        } else {
-            body.classList.replace('dark', 'white');
-            themeIcon.src = 'images/moond.png';
-        }
+        body.classList.toggle('dark');
+        body.classList.toggle('white');
+        themeIcon.src = body.classList.contains('dark') ? 'images/sun.png' : 'images/moond.png';
     }
 
-    function randomGradient() {
-        const colors = [
-            ["#ff7e5f", "#feb47b"],
-            ["#00c6ff", "#0072ff"],
-            ["#f7971e", "#ffd200"],
-            ["#8e2de2", "#4a00e0"],
-            ["#f54ea2", "#ff7676"],
-            ["#007991", "#78ffd6"],
-            ["#ff9966", "#ff5e62"],
-            ["#3a1c71", "#d76d77", "#ffaf7b"]
-        ];
-        const randomColors = colors[Math.floor(Math.random() * colors.length)];
-        document.body.style.background = `linear-gradient(135deg, ${randomColors.join(", ")})`;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        randomGradient();
+    window.onload = function() {
         renderQuestions();
-        renderGuessQuestions();
-    });
+    };
 </script>
-
 </body>
 </html>
