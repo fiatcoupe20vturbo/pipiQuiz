@@ -6,67 +6,86 @@
     <title>pipiQuiz - Arkadaşlık Testi</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(0deg, #408080 0%, #400040 100%);
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
             color: #333;
             text-align: center;
+            margin: 0;
+            padding: 0;
             transition: background-color 0.3s, color 0.3s;
         }
         body.dark {
-            background-color: #333;
+            background: linear-gradient(135deg, #2e2e2e, #4a4a4a);
             color: #f4f4f9;
         }
         body.white {
-            background-color: #fff;
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
             color: #333;
         }
         h1 {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.85);
             color: #333;
             display: inline-block;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 10px;
             margin: 20px 0;
+            font-size: 2em;
             transition: background-color 0.3s, color 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         body.dark h1 {
-            background-color: rgba(50, 50, 50, 0.8);
+            background-color: rgba(50, 50, 50, 0.85);
             color: #f4f4f9;
         }
         #quiz, #share-link, #guess-section, #leaderboard {
             max-width: 600px;
             margin: auto;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
             margin-top: 20px;
             transition: background 0.3s;
         }
         body.dark #quiz, body.dark #share-link, body.dark #guess-section, body.dark #leaderboard {
-            background: rgba(50, 50, 50, 0.9);
+            background: rgba(40, 40, 40, 0.95);
         }
         button {
-            padding: 10px 20px;
-            margin: 5px;
+            padding: 12px 25px;
+            margin: 10px;
             cursor: pointer;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             background-color: #4CAF50;
             color: white;
-            font-size: 16px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
         }
         button:disabled {
             background-color: #ccc;
         }
         .option-btn {
             background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .option-btn:hover {
+            background-color: #1e88e5;
         }
         .option-btn.correct {
-            background-color: green;
+            background-color: #4CAF50;
         }
         .option-btn.incorrect {
-            background-color: red;
+            background-color: #f44336;
         }
         #theme-toggle {
             position: fixed;
@@ -78,8 +97,12 @@
             outline: none;
         }
         #theme-toggle img {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
+            transition: transform 0.3s;
+        }
+        #theme-toggle img:hover {
+            transform: rotate(15deg);
         }
         #github-link {
             margin-left: 10px;
@@ -107,7 +130,7 @@
 </button>
 
 <div id="quiz">
-    <input type="text" id="user-name" placeholder="Adınızı girin" required>
+    <input type="text" id="user-name" placeholder="Adınızı girin" required style="width: 80%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
     <div id="questions"></div>
     <button onclick="generateLink()">Linki Oluştur</button>
 </div>
@@ -119,7 +142,7 @@
 
 <div id="guess-section" style="display: none;">
     <h2>Tahmin Et</h2>
-    <input type="text" id="guess-name" placeholder="Adınızı girin" required>
+    <input type="text" id="guess-name" placeholder="Adınızı girin" required style="width: 80%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 20px;">
     <div id="guess-questions"></div>
     <button onclick="revealResults()">Sonucu Gör</button>
     <p id="score"></p>
@@ -181,9 +204,12 @@
         document.getElementById('share-link').style.display = 'block';
     }
 
-    function renderGuessQuestions(correctAnswers, userName) {
-        const guessContainer = document.getElementById('guess-questions');
-        guessContainer.innerHTML = `<h3>${userName} neleri seviyor?</h3>`;
+    function renderGuessQuestions() {
+        const params = new URLSearchParams(window.location.search);
+        const encodedAnswers = params.get('answers');
+        if (!encodedAnswers) return;
+        const correctAnswers = atob(encodedAnswers).split(",").map(Number);
+        const questionContainer = document.getElementById('guess-questions');
         questions.forEach((q, index) => {
             const qDiv = document.createElement('div');
             qDiv.innerHTML = `<p>${q.question}</p>`;
@@ -192,65 +218,52 @@
                 optBtn.innerText = opt;
                 optBtn.className = 'option-btn';
                 optBtn.onclick = () => {
-                    optBtn.dataset.selected = i;
+                    answers[index] = i;
                     disableOptions(qDiv);
                 };
                 qDiv.appendChild(optBtn);
             });
-            guessContainer.appendChild(qDiv);
+            questionContainer.appendChild(qDiv);
         });
+        document.getElementById('guess-section').style.display = 'block';
     }
 
     function revealResults() {
-        const guessName = document.getElementById('guess-name').value;
-        if (!guessName) {
-            alert("Lütfen isminizi girin.");
-            return;
-        }
-
+        const correctAnswers = atob(new URLSearchParams(window.location.search).get('answers')).split(",").map(Number);
         let score = 0;
-        const guessContainer = document.getElementById('guess-questions');
-        const guessButtons = guessContainer.querySelectorAll('.option-btn');
-        guessButtons.forEach((btn, index) => {
-            const qIndex = Math.floor(index / questions[0].options.length);
-            const correctAnswer = parseInt(questions[qIndex].correctAnswer);
-            if (btn.dataset.selected == correctAnswer) {
+        answers.forEach((ans, index) => {
+            if (ans === correctAnswers[index]) {
                 score++;
-                btn.classList.add('correct');
-            } else {
-                btn.classList.add('incorrect');
             }
         });
+        document.getElementById('score').innerText = `Skorunuz: ${score} / ${questions.length}`;
+        addToLeaderboard(score);
+    }
 
-        document.getElementById('score').innerText = `Skorunuz: ${score}`;
-        const leaderboardList = document.getElementById('leaderboard-list');
+    function addToLeaderboard(score) {
+        const leaderboard = document.getElementById('leaderboard-list');
         const scoreItem = document.createElement('li');
-        scoreItem.innerText = `${guessName} - Skor: ${score}`;
-        leaderboardList.appendChild(scoreItem);
+        scoreItem.innerText = `Skor: ${score} - ${document.getElementById('guess-name').value}`;
+        leaderboard.appendChild(scoreItem);
         document.getElementById('leaderboard').style.display = 'block';
     }
 
     function toggleTheme() {
-        document.body.classList.toggle('dark');
-        document.body.classList.toggle('white');
+        const body = document.body;
         const themeIcon = document.getElementById('theme-icon');
-        themeIcon.src = document.body.classList.contains('dark') ? 'images/sun.png' : 'images/moond.png';
+        if (body.classList.contains('white')) {
+            body.classList.replace('white', 'dark');
+            themeIcon.src = 'images/sunn.png';
+        } else {
+            body.classList.replace('dark', 'white');
+            themeIcon.src = 'images/moond.png';
+        }
     }
 
-    window.onload = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const name = urlParams.get('name');
-        const answers = urlParams.get('answers');
-
-        if (name && answers) {
-            document.getElementById('quiz').style.display = 'none';
-            document.getElementById('guess-section').style.display = 'block';
-            const correctAnswers = atob(answers).split(",").map(Number);
-            renderGuessQuestions(correctAnswers, name);
-        } else {
-            renderQuestions();
-        }
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+        renderQuestions();
+        renderGuessQuestions();
+    });
 </script>
 
 </body>
