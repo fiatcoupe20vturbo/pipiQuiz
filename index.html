@@ -94,7 +94,9 @@
 <body class="white">
 
 <h1>
-    pipiQuiz - Arkadaşlık Testi
+    <a href="https://fiatcoupe20vturbo.github.io/pipiQuiz/" style="text-decoration: none; color: inherit;">
+        pipiQuiz - Arkadaşlık Testi
+    </a>
     <a id="github-link" href="https://github.com/fiatcoupe20vturbo/pipiQuiz" target="_blank">
         <img src="images/github.png" alt="GitHub">
     </a>
@@ -117,6 +119,7 @@
 
 <div id="guess-section" style="display: none;">
     <h2>Tahmin Et</h2>
+    <input type="text" id="guess-name" placeholder="Adınızı girin" required>
     <div id="guess-questions"></div>
     <button onclick="revealResults()">Sonucu Gör</button>
     <p id="score"></p>
@@ -199,6 +202,12 @@
     }
 
     function revealResults() {
+        const guessName = document.getElementById('guess-name').value;
+        if (!guessName) {
+            alert("Lütfen isminizi girin.");
+            return;
+        }
+
         let score = 0;
         const guessContainer = document.getElementById('guess-questions');
         const guessButtons = guessContainer.querySelectorAll('.option-btn');
@@ -212,14 +221,11 @@
                 btn.classList.add('incorrect');
             }
         });
-        document.getElementById('score').innerText = `Sonuç: ${score} doğru cevap.`;
-        updateLeaderboard(score);
-    }
 
-    function updateLeaderboard(score) {
+        document.getElementById('score').innerText = `Skorunuz: ${score}`;
         const leaderboardList = document.getElementById('leaderboard-list');
         const scoreItem = document.createElement('li');
-        scoreItem.innerText = `Skor: ${score}`;
+        scoreItem.innerText = `${guessName} - Skor: ${score}`;
         leaderboardList.appendChild(scoreItem);
         document.getElementById('leaderboard').style.display = 'block';
     }
